@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ProgressProject</string>
+    <string name="search">Search</string>
+    <string name="headline">Headline</string>
+    <string name="snippet">Snippet</string>
+    <string name="articleimage">ArticleImage</string>
+</resources>
