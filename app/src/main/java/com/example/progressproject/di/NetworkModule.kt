@@ -1,6 +1,7 @@
 package com.example.progressproject.di
 
 import com.example.progressproject.common.BASE_URL
+import com.example.progressproject.di.application.ApplicationScope
 import com.example.progressproject.network.NetworkService
 import dagger.Module
 import dagger.Provides
@@ -10,12 +11,16 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
+
+/***
+ * Since you include the network module in the application module,
+ * the network module should also be scoped to the application instead of singleton
+ */
 
 @Module
 class NetworkModule {
     @Provides
-    @Singleton
+    @ApplicationScope
     fun providesInterceptor(): HttpLoggingInterceptor {
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -23,7 +28,7 @@ class NetworkModule {
     }
 
     @Provides
-    @Singleton
+    @ApplicationScope
     fun provideOkHTTPClient(interceptor: HttpLoggingInterceptor): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(interceptor)
@@ -33,7 +38,7 @@ class NetworkModule {
     }
 
     @Provides
-    @Singleton
+    @ApplicationScope
     fun providesRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .client(okHttpClient)
@@ -44,6 +49,6 @@ class NetworkModule {
     }
 
     @Provides
-    @Singleton
+    @ApplicationScope
     fun provideService(retrofit: Retrofit): NetworkService = retrofit.create(NetworkService::class.java)
 }

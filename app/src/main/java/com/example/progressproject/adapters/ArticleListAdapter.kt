@@ -11,19 +11,18 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.example.progressproject.R
+import com.example.progressproject.common.BASE_IMAGE_URL
 import com.example.progressproject.data.models.ApiResponse
 import com.example.progressproject.data.models.Doc
+import com.example.progressproject.data.models.Multimedium
 import com.example.progressproject.ui.detail.ArticleDetailActivity
 import com.example.progressproject.ui.detail.ArticleDetailFragment
 import com.example.progressproject.ui.home.MainActivity
 
-class ArticleListAdapter(
-    private val parentActivity: MainActivity,
-    private val articleList: List<Doc>,
-    private var twoPane: Boolean = false
-) : RecyclerView.Adapter<ArticleListAdapter.ViewHolder>() {
+class ArticleListAdapter(private val articleList: List<Doc>, private val listener: OnItemClickedListener) :
+    RecyclerView.Adapter<ArticleListAdapter.ViewHolder>() {
 
-    lateinit var context: Context
+    private lateinit var context: Context
 /*
     private var onClickListener: View.OnClickListener
 */
@@ -55,7 +54,8 @@ class ArticleListAdapter(
     }*/
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ArticleListAdapter.ViewHolder {
-        val view = LayoutInflater.from(viewGroup.context).inflate(
+        context = viewGroup.context
+        val view = LayoutInflater.from(context).inflate(
             R.layout.recycler_view_article, viewGroup, false)
         return ViewHolder(view)
     }
@@ -63,19 +63,35 @@ class ArticleListAdapter(
     override fun getItemCount(): Int = articleList.size
 
     override fun onBindViewHolder(holder: ArticleListAdapter.ViewHolder, position: Int) {
-        var temp = articleList[position]
+        val temp = articleList[position]
         holder.apply {
             headline.text = temp.headline.main
             snippet.text = temp.snippet
 
+            /**
+             * Added this bit to get the image to be displayed in the recyclerView
+             */
+            val multimedia: ArrayList<Multimedium> = temp.multimedia as ArrayList<Multimedium>
+            var thumbnail = ""
+
+            for (media in multimedia)
+            {
+                if (media.type == "image" && media.subtype == "thumbnail"){
+                    thumbnail = BASE_IMAGE_URL + media.url
+                    break
+                }
+            }
+
             Glide.with(context)
-                .load(temp.multimedia[position].url).into(image)
+                .load(thumbnail).into(image)
             /*with(holder.itemView) {
                 tag = temp
                 setOnClickListener(onClickListener)
             }*/
         }
 
+        //Handle the click here
+        holder.itemView.setOnClickListener { listener.onItemClicked(position) }
 
     }
 
@@ -85,4 +101,11 @@ class ArticleListAdapter(
         val image: ImageView = articleView.findViewById(R.id.imageView)
     }
 
+    /**
+     * Interface to handle recycler view item click
+     * implemented in the main activity
+     */
+    interface OnItemClickedListener{
+        fun onItemClicked(position: Int)
+    }
 }
